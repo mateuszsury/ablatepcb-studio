@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from gerber2lightburn.excellon import merge_drills, parse_excellon
+from ablatepcb.excellon import merge_drills, parse_excellon
 
 
 def test_excellon_points_slots_and_via_priority(tmp_path: Path) -> None:
@@ -22,4 +22,3 @@ def test_excellon_points_slots_and_via_priority(tmp_path: Path) -> None:
     assert hits[0].x == 10.0 and hits[0].y == 20.0
     assert len(slots) == 1
     assert slots[0].x2 == 13.0
-

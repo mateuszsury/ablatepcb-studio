@@ -1,11 +1,10 @@
 cff-version: 1.2.0
 message: "If this tool helps your fabrication workflow, please cite the software repository."
-title: "Gerber2LightBurn PCB"
+title: "AblatePCB Studio"
 type: software
 authors:
   - name: "mateuszsury"
-version: 0.1.0
+version: 0.2.0
 date-released: 2026-07-21
-url: "https://github.com/mateuszsury/gerber2lightburn-pcb"
+url: "https://github.com/mateuszsury/ablatepcb-studio"
 license: MIT
-

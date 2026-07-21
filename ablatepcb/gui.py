@@ -251,7 +251,7 @@ class Bridge(QObject):
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("Gerber2LightBurn PCB")
+        self.setWindowTitle("AblatePCB Studio")
         self.resize(1380, 880)
         self.setMinimumSize(980, 680)
         self.view = DropWebView(self)
@@ -296,7 +296,7 @@ class MainWindow(QMainWindow):
 
 def main() -> int:
     app = QApplication(sys.argv)
-    app.setApplicationName("Gerber2LightBurn PCB")
+    app.setApplicationName("AblatePCB Studio")
     app.setOrganizationName("Local PCB Tools")
     window = MainWindow()
     window.place_on_lightburn_screen()

@@ -1,5 +1,7 @@
 # LightBurn integration
 
+AblatePCB Studio is an independent application, not an official LightBurn product. The integration was tested with LightBurn 2.1.03 on Windows. Compatibility language identifies the intended interoperable product and does not imply affiliation, endorsement, or sponsorship by LightBurn Software.
+
 ## Transport
 
 LightBurn listens for documented automation commands on `127.0.0.1:19840` and returns responses on port `19841`. This app uses `PING`, `STATUS`, `LOADFILE:<path>`, and `START`.
@@ -21,4 +23,3 @@ Start is accepted only when:
 3. the user accepts the second confirmation dialog.
 
 The app does not automatically start after import, generation, file loading, or preset application.
-

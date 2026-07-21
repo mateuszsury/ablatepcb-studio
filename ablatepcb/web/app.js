@@ -2,10 +2,10 @@ let backend = null;
 let analysis = null;
 let selectedPreview = "top";
 let lastLightBurnStatus = null;
-let language = localStorage.getItem("g2lb-language") === "en" ? "en" : "pl";
+let language = localStorage.getItem("ablatepcb-language") === "en" ? "en" : "pl";
 
 const PL_EN = {
-  "PCB mask studio": "PCB mask studio",
+  "Studio masek PCB": "PCB mask studio",
   "Źródło": "Source", "Gerber ZIP lub katalog": "Gerber ZIP or folder",
   "Kontrola": "Review", "Warstwy i przelotki": "Layers and vias",
   "Ustawienie": "Setup", "Laminat i orientacja": "Board and orientation",
@@ -19,7 +19,7 @@ const PL_EN = {
   "Przeciągnij tutaj plik ZIP": "Drop a ZIP file here", "albo kliknij, aby wybrać archiwum": "or click to choose an archive",
   ".zip · folder Gerberów": ".zip · Gerber folder", "Wybierz rozpakowany katalog zamiast ZIP →": "Choose an extracted folder instead of ZIP →",
   "AKTYWNY PROJEKT": "ACTIVE PROJECT", "Zmień projekt": "Change project",
-  "Wykrywanie lokalnej aplikacji": "Detecting local application", "upłynęło": "elapsed", "pozostało": "remaining",
+  "Łączenie…": "Connecting…", "Wykrywanie lokalnej aplikacji": "Detecting local application", "upłynęło": "elapsed", "pozostało": "remaining",
   "POZYCJA": "POSITION", "PRĘDKOŚĆ": "SPEED", "MOC": "POWER", "PRZEJŚCIA": "PASSES",
   "Zastosuj preset Pixi": "Apply Pixi preset", "Pauza": "Pause",
   "Potwierdzam poprawny Frame, położenie laminatu, wentylację i nadzór nad laserem.": "I confirm the Frame, board position, ventilation, and continuous laser supervision.",
@@ -93,7 +93,7 @@ function translateDocument() {
 
 document.querySelectorAll("[data-lang]").forEach((button) => button.addEventListener("click", () => {
   language = button.dataset.lang;
-  localStorage.setItem("g2lb-language", language);
+  localStorage.setItem("ablatepcb-language", language);
   translateDocument();
 }));
 

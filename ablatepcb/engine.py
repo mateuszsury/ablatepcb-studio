@@ -198,13 +198,13 @@ class Converter:
         parent = Path(output_parent).resolve() if output_parent else source_parent
         parent.mkdir(parents=True, exist_ok=True)
         stem = re.sub(r"[^A-Za-z0-9._-]+", "_", analysis.source.stem or analysis.source.name).strip("._") or "pcb"
-        destination = parent / f"{stem}_LightBurn"
+        destination = parent / f"{stem}_AblatePCB"
         counter = 2
         while destination.exists():
-            destination = parent / f"{stem}_LightBurn_{counter}"
+            destination = parent / f"{stem}_AblatePCB_{counter}"
             counter += 1
 
-        with tempfile.TemporaryDirectory(prefix="g2lb_output_", dir=parent) as temp_name:
+        with tempfile.TemporaryDirectory(prefix="ablatepcb_output_", dir=parent) as temp_name:
             temp = Path(temp_name)
             top_layer = analysis.selected("top_copper")
             bottom_layer = analysis.selected("bottom_copper")
@@ -252,7 +252,7 @@ class Converter:
                 "imageHeight": analysis.board_bounds.height,
             }
             manifest = {
-                "schema": "gerber2lightburn.pcb-package.v1",
+                "schema": "ablatepcb.pcb-package.v1",
                 "createdUtc": datetime.now(timezone.utc).isoformat(),
                 "source": str(analysis.source),
                 "board": analysis.board_bounds.to_dict(),
@@ -327,4 +327,3 @@ class Converter:
 {''.join(markers)}
 </svg>'''
         path.write_text(svg, encoding="utf-8")
-

@@ -8,14 +8,14 @@ __pycache__/
 htmlcov/
 .venv/
 venv/
+*.egg-info/
 build/
 dist/
 *.spec
 *.log
-Gerber2LightBurn_*/
+AblatePCB_*/
 output/
 .idea/
 .vscode/
 .DS_Store
 Thumbs.db
-

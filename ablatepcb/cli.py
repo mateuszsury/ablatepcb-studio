@@ -8,7 +8,7 @@ from .engine import Converter
 
 
 def parser() -> argparse.ArgumentParser:
-    result = argparse.ArgumentParser(description="Konwerter Gerber do masek PCB dla LightBurn")
+    result = argparse.ArgumentParser(description="AblatePCB Studio — konwerter Gerber/Excellon z integracją LightBurn")
     sub = result.add_subparsers(dest="command", required=True)
     analyze = sub.add_parser("analyze", help="Przeanalizuj ZIP lub katalog")
     analyze.add_argument("source")

@@ -37,13 +37,15 @@ python app.py
 3. Podaj wymiary surowego laminatu i jego lewy dolny narożnik na stole.
 4. Wybierz fizyczny sposób odwrócenia płytki.
 5. Wygeneruj pakiet.
-6. Wczytaj stronę TOP lub BOTTOM do LightBurn i zastosuj preset.
+6. Wczytaj stronę TOP lub BOTTOM do LightBurn; aplikacja ustawi i zweryfikuje pozycję oraz zastosuje preset.
 7. Wykonaj Frame oraz sprawdź pozycję, wentylację, ochronę oczu i bezpieczeństwo pożarowe.
 8. Dopiero wtedy potwierdź Start i pozostań przy urządzeniu.
 
 Wczytanie pliku ani zastosowanie presetu nie uruchamia lasera. Start wymaga checkboxa bezpieczeństwa oraz dodatkowego potwierdzenia.
 
 Jeżeli nie wczytano jeszcze Gerbera, preset zmienia wyłącznie prędkość, moc, interwał i liczbę przejść aktywnej warstwy LightBurn. Rozmiar, pozycja obrazu i tryb współrzędnych pozostają bez zmian.
+
+Po wygenerowaniu pakietu przyciski TOP/BOTTOM importują maskę do bieżącego projektu LightBurn, ustawiają jej rozmiar i pozycję, a następnie odczytują wartości z LightBurn. Sukces jest zgłaszany dopiero po potwierdzeniu faktycznego lewego dolnego rogu obrazu.
 
 Integrację sprawdzono z **LightBurn 2.1.03 w Windows**. Jest to opis kompatybilności, a nie deklaracja oficjalnej certyfikacji lub poparcia. Jeżeli identyfikatory interfejsu zmienią się w przyszłej wersji LightBurn, aplikacja pokaże błąd zamiast zgadywać kontrolkę.
 

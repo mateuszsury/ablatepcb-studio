@@ -7,6 +7,12 @@
 .control-dock .machine-panel { margin-bottom: 0; }
 .control-dock .profile-panel { margin-top: 10px; }
 .control-dock + #sourceView .hero-grid { min-height: 500px; }
+.step { cursor: pointer; transition: background-color .18s ease, color .18s ease, opacity .18s ease, transform .18s ease; }
+.step.available:not(.active):hover { background: #151f1b; transform: translateX(2px); }
+.step:disabled { cursor: not-allowed; opacity: .42; }
+.active-view { animation: view-enter .2s ease both; }
+#controlSection, #setupSection, #exportSection, #resultView { scroll-margin-top: 20px; }
+@keyframes view-enter { from { opacity: .72; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 .preview-stage {
   position: relative;
   display: block;

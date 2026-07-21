@@ -16,10 +16,10 @@
         <div><strong>Ablate<span>PCB</span></strong><small>Studio masek PCB</small></div>
       </div>
       <nav class="steps" aria-label="Etapy">
-        <button class="step active" data-step="1"><i>1</i><span><b>Źródło</b><small>Gerber ZIP lub katalog</small></span></button>
-        <button class="step" data-step="2"><i>2</i><span><b>Kontrola</b><small>Warstwy i przelotki</small></span></button>
-        <button class="step" data-step="3"><i>3</i><span><b>Ustawienie</b><small>Laminat i orientacja</small></span></button>
-        <button class="step" data-step="4"><i>4</i><span><b>Eksport</b><small>Pakiet LightBurn</small></span></button>
+        <button class="step active" data-step="1" aria-current="step"><i>1</i><span><b>Źródło</b><small>Gerber ZIP lub katalog</small></span></button>
+        <button class="step" data-step="2" disabled aria-disabled="true"><i>2</i><span><b>Kontrola</b><small>Warstwy i przelotki</small></span></button>
+        <button class="step" data-step="3" disabled aria-disabled="true"><i>3</i><span><b>Ustawienie</b><small>Laminat i orientacja</small></span></button>
+        <button class="step" data-step="4" disabled aria-disabled="true"><i>4</i><span><b>Eksport</b><small>Pakiet LightBurn</small></span></button>
       </nav>
       <div class="safety-note"><span>LASER</span><p>Program przygotowuje pliki, ale nigdy sam nie uruchamia lasera.</p></div>
     </aside>
@@ -95,7 +95,7 @@
           <button class="secondary" id="changeProject">Zmień projekt</button>
         </div>
 
-        <div class="dashboard-grid">
+        <div class="dashboard-grid" id="controlSection">
           <section class="panel preview-panel">
             <div class="panel-head">
               <div><p class="kicker">PODGLĄD KONTROLNY</p><h3>Geometria miedzi</h3></div>
@@ -119,7 +119,7 @@
             <details><summary>Rozpoznane pliki warstw</summary><div id="layersList" class="layers-list"></div></details>
           </section>
 
-          <section class="panel setup-panel">
+          <section class="panel setup-panel" id="setupSection">
             <div class="panel-head"><div><p class="kicker">USTAWIENIE FIZYCZNE</p><h3>Laminat na stole</h3></div></div>
             <div class="field-grid">
               <label>Szerokość laminatu <span><input id="blankWidth" type="number" step="0.01"> mm</span></label>
@@ -135,7 +135,7 @@
           </section>
         </div>
 
-        <div class="export-bar">
+        <div class="export-bar" id="exportSection">
           <div><span class="ready-dot"></span><p><b id="exportStatus">Gotowe do wygenerowania</b><small>PNG 1270 DPI + podglądy + wiercenia + raport</small></p></div>
           <button class="primary" id="generateButton">Generuj pakiet LightBurn <span>→</span></button>
         </div>
@@ -145,7 +145,7 @@
         <div class="success-mark">✓</div><p class="kicker">PAKIET GOTOWY</p><h2>Możesz przejść do LightBurn.</h2>
         <p>Maski, alternatywne odbicie dolnej strony, przewodnik wiercenia i raport zostały zapisane w jednym katalogu.</p>
         <code id="outputPath"></code>
-        <div class="result-actions"><button class="primary" id="loadTop">Wczytaj TOP do LightBurn</button><button class="secondary" id="loadBottom">Wczytaj BOTTOM</button><button class="secondary" id="openOutput">Otwórz katalog</button><button class="secondary" id="openReport">Otwórz raport</button><button class="text-button" id="backToProject">← Wróć do projektu</button></div>
+        <div class="result-actions"><button class="primary" id="loadTop">Wczytaj TOP i ustaw pozycję</button><button class="secondary" id="loadBottom">Wczytaj BOTTOM i ustaw pozycję</button><button class="secondary" id="openOutput">Otwórz katalog</button><button class="secondary" id="openReport">Otwórz raport</button><button class="text-button" id="backToProject">← Wróć do projektu</button></div>
       </section>
     </main>
   </div>

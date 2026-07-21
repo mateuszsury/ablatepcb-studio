@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ablatepcb-studio"
-version = "0.2.2"
+version = "0.2.3"
 description = "Offline Gerber/Excellon PCB ablation studio with LightBurn integration"
 readme = "README.md"
 license = { file = "LICENSE" }

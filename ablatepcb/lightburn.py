@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import re
 import ctypes
+import math
 import os
 import shutil
 import socket
 import subprocess
+import time
 from pathlib import Path
 from dataclasses import asdict, dataclass
 from typing import Any
@@ -219,18 +221,82 @@ class LightBurnConnector:
         pattern.SetValue(float(value))
 
     def _numeric_set(self, control, value: float) -> None:  # type: ignore[no-untyped-def]
-        """Set Qt numeric fields, including controls exposing a degenerate range."""
+        """Set a Qt numeric field and verify that LightBurn accepted the value."""
         try:
             self._range_set(control, value)
-            return
-        except ValueError:
+            if self._wait_for_numeric_value(control, value, 0.25):
+                return
+        except Exception:
             pass
-        from pywinauto.uia_defines import IUIA
+        try:
+            from pywinauto.uia_defines import IUIA
 
-        uia = IUIA()
-        unknown = control.element_info.element.GetCurrentPattern(uia.UIA_dll.UIA_LegacyIAccessiblePatternId)
-        pattern = unknown.QueryInterface(uia.UIA_dll.IUIAutomationLegacyIAccessiblePattern)
-        pattern.SetValue((f"{value:g}").replace(".", ","))
+            uia = IUIA()
+            unknown = control.element_info.element.GetCurrentPattern(uia.UIA_dll.UIA_LegacyIAccessiblePatternId)
+            pattern = unknown.QueryInterface(uia.UIA_dll.IUIAutomationLegacyIAccessiblePattern)
+            pattern.SetValue((f"{value:g}").replace(".", ","))
+            if self._wait_for_numeric_value(control, value, 0.25):
+                return
+        except Exception:
+            pass
+
+        # LightBurn's Qt spin boxes can report success for both UIA patterns
+        # without changing their value. Keyboard entry is the reliable final
+        # path, but only after the selected graphic makes the field editable.
+        if not control.is_enabled():
+            raise RuntimeError("Pole położenia LightBurn jest nieaktywne. Nie udało się zaznaczyć wczytanej grafiki.")
+        from pywinauto import keyboard
+
+        control.click_input()
+        keyboard.send_keys("^a")
+        keyboard.send_keys((f"{value:g}").replace(".", ","), with_spaces=True)
+        keyboard.send_keys("{ENTER}")
+        if not self._wait_for_numeric_value(control, value, 1.0):
+            actual = self._legacy_number(control)
+            raise RuntimeError(f"LightBurn nie przyjął wartości {value:g}; odczytano {actual!r}.")
+
+    def _wait_for_numeric_value(self, control, expected: float, timeout: float) -> bool:  # type: ignore[no-untyped-def]
+        deadline = time.monotonic() + timeout
+        while True:
+            actual = self._legacy_number(control)
+            if actual is not None and math.isclose(actual, expected, rel_tol=1e-6, abs_tol=0.001):
+                return True
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(0.05)
+
+    @staticmethod
+    def _position_controls(window):  # type: ignore[no-untyped-def]
+        x_controls = sorted(
+            [item for item in window.descendants(control_type="Spinner") if item.element_info.automation_id == "MainWindow.tbNumericEdits.QXYControl.sbX"],
+            key=lambda item: item.rectangle().left,
+        )
+        y_controls = sorted(
+            [item for item in window.descendants(control_type="Spinner") if item.element_info.automation_id == "MainWindow.tbNumericEdits.QXYControl.sbY"],
+            key=lambda item: item.rectangle().left,
+        )
+        return x_controls, y_controls
+
+    def _select_centered_graphic(self, window, force: bool = False) -> tuple[list[Any], list[Any]]:  # type: ignore[no-untyped-def]
+        x_controls, y_controls = self._position_controls(window)
+        if len(x_controls) < 2 or len(y_controls) < 2:
+            raise RuntimeError("Nie znaleziono kontrolek położenia obrazu w LightBurn.")
+        if not force and x_controls[0].is_enabled() and y_controls[0].is_enabled():
+            return x_controls, y_controls
+
+        # LightBurn IMPORT places the image in the center of the edit area.
+        # Clicking the exact canvas center selects that image without relying
+        # on a language-specific menu or keyboard focus.
+        canvas = window.child_window(auto_id="MainWindow.centralWidget.ewEdit").wrapper_object()
+        rect = canvas.rectangle()
+        canvas.click_input(coords=((rect.right - rect.left) // 2, (rect.bottom - rect.top) // 2))
+        deadline = time.monotonic() + 3.0
+        while time.monotonic() < deadline:
+            x_controls, y_controls = self._position_controls(window)
+            if len(x_controls) >= 2 and len(y_controls) >= 2 and x_controls[0].is_enabled() and y_controls[0].is_enabled():
+                return x_controls, y_controls
+            time.sleep(0.1)
+        raise RuntimeError("Maska została wczytana, ale LightBurn nie pozwolił jej zaznaczyć i ustawić pozycji.")
 
     def apply_preset(self, options: dict[str, Any]) -> dict[str, Any]:
         app, window, _found = self._window()
@@ -250,14 +316,7 @@ class LightBurnConnector:
         position_applied = False
         if include_geometry:
             # Selected image: first X/Y pair is position, second pair is width/height.
-            x_controls = sorted(
-                [item for item in window.descendants(control_type="Spinner") if item.element_info.automation_id == "MainWindow.tbNumericEdits.QXYControl.sbX"],
-                key=lambda item: item.rectangle().left,
-            )
-            y_controls = sorted(
-                [item for item in window.descendants(control_type="Spinner") if item.element_info.automation_id == "MainWindow.tbNumericEdits.QXYControl.sbY"],
-                key=lambda item: item.rectangle().left,
-            )
+            x_controls, y_controls = self._select_centered_graphic(window, force=bool(options.get("selectCenteredGraphic", False)))
         else:
             x_controls, y_controls = [], []
         if include_geometry and len(x_controls) >= 2 and len(y_controls) >= 2:
@@ -267,11 +326,28 @@ class LightBurnConnector:
             blank_h = max(board_h, float(options.get("blankHeight", board_h)))
             center_x = float(options.get("originX", 10)) + blank_w / 2
             center_y = float(options.get("originY", 10)) + blank_h / 2
-            self._numeric_set(x_controls[0], center_x)
-            self._numeric_set(y_controls[0], center_y)
+
+            # Coordinate fields must describe the image center, independent
+            # of the anchor the user previously selected in LightBurn.
+            center_anchor = window.child_window(auto_id="MainWindow.tbNumericEdits.OriginWidget.grpOrigin.rb_MM").wrapper_object()
+            center_anchor.click_input()
             self._numeric_set(x_controls[1], board_w)
             self._numeric_set(y_controls[1], board_h)
-            position_applied = True
+            self._numeric_set(x_controls[0], center_x)
+            self._numeric_set(y_controls[0], center_y)
+
+            actual_x = self._legacy_number(x_controls[0])
+            actual_y = self._legacy_number(y_controls[0])
+            actual_w = self._legacy_number(x_controls[1])
+            actual_h = self._legacy_number(y_controls[1])
+            expected = (center_x, center_y, board_w, board_h)
+            actual = (actual_x, actual_y, actual_w, actual_h)
+            position_applied = all(
+                value is not None and math.isclose(value, target, rel_tol=1e-6, abs_tol=0.001)
+                for value, target in zip(actual, expected, strict=True)
+            )
+            if not position_applied:
+                raise RuntimeError(f"Weryfikacja pozycji LightBurn nie powiodła się: oczekiwano {expected}, odczytano {actual}.")
 
         if include_geometry:
             # Absolute coordinates are required for deterministic placement.
@@ -285,6 +361,11 @@ class LightBurnConnector:
             "numericPreset": True,
             "imagePreset": "lightburn_default",
             "positionApplied": position_applied,
+            "center": {"x": center_x, "y": center_y} if include_geometry else None,
+            "imageLowerLeft": {
+                "x": center_x - float(options.get("boardWidth", 0)) / 2,
+                "y": center_y - float(options.get("boardHeight", 0)) / 2,
+            } if include_geometry else None,
             "message": (
                 "Zastosowano prędkość, moc, interwał, liczbę przejść, rozmiar i pozycję. Ustawienia obrazu korzystają z zapisanego profilu LightBurn."
                 if include_geometry
@@ -300,7 +381,10 @@ class LightBurnConnector:
             raise ValueError("Do LightBurn można wczytać tylko PNG, LBRN lub LBRN2.")
         if self.find_window() is None:
             raise RuntimeError("LightBurn nie jest uruchomiony.")
-        response = self._udp_command(f"LOADFILE:{source}")
+        # PNG is artwork, so import it into the current project instead of
+        # replacing that project and triggering an unsaved-changes dialog.
+        command = "IMPORT" if source.suffix.lower() == ".png" else "LOADFILE"
+        response = self._udp_command(f"{command}:{source}")
         if response != "OK":
             raise RuntimeError(f"LightBurn odrzucił plik ({response or 'brak odpowiedzi'}).")
 

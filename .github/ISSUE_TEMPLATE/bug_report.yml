@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a reproducible conversion, UI, or LightBurn integration problem.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not attach proprietary Gerbers or LightBurn license/preferences data."
+  - type: input
+    id: version
+    attributes:
+      label: Application version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Windows 11, LightBurn 2.1.03, laser/controller
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: No automated test started a physical laser.
+          required: true
+

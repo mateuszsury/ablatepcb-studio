@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gerber2LightBurn PCB</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="overrides.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="logo.png" alt="">
+        <div><strong>Gerber<span>2</span>LightBurn</strong><small>PCB mask studio</small></div>
+      </div>
+      <nav class="steps" aria-label="Etapy">
+        <button class="step active" data-step="1"><i>1</i><span><b>Źródło</b><small>Gerber ZIP lub katalog</small></span></button>
+        <button class="step" data-step="2"><i>2</i><span><b>Kontrola</b><small>Warstwy i przelotki</small></span></button>
+        <button class="step" data-step="3"><i>3</i><span><b>Ustawienie</b><small>Laminat i orientacja</small></span></button>
+        <button class="step" data-step="4"><i>4</i><span><b>Eksport</b><small>Pakiet LightBurn</small></span></button>
+      </nav>
+      <div class="safety-note"><span>LASER</span><p>Program przygotowuje pliki, ale nigdy sam nie uruchamia lasera.</p></div>
+    </aside>
+
+    <main>
+      <header>
+        <div><p class="eyebrow">LOKALNE NARZĘDZIE PRODUKCYJNE</p><h1>Maski PCB bez ręcznej konwersji</h1></div>
+        <div class="header-tools">
+          <div class="language-switch" aria-label="Język / Language"><button data-lang="pl">PL</button><button data-lang="en">EN</button></div>
+          <div class="status-pill" id="statusPill"><span></span><b>Gotowy</b></div>
+        </div>
+      </header>
+
+      <section id="sourceView" class="view active-view">
+        <div class="hero-grid">
+          <div class="intro">
+            <p class="kicker">01 / IMPORT</p>
+            <h2>Upuść paczkę produkcyjną.</h2>
+            <p>Rozpoznamy warstwy miedzi, obrys, wiercenia i przelotki. Pliki pozostają wyłącznie na tym komputerze.</p>
+            <div class="format-row"><span>EasyEDA</span><span>KiCad</span><span>Altium</span><span>RS-274X</span><span>Excellon</span></div>
+          </div>
+          <button class="drop-zone" id="dropZone">
+            <div class="drop-icon"><span></span></div>
+            <strong>Przeciągnij tutaj plik ZIP</strong>
+            <p>albo kliknij, aby wybrać archiwum</p>
+            <em>.zip · folder Gerberów</em>
+          </button>
+        </div>
+        <button class="text-button" id="folderButton">Wybierz rozpakowany katalog zamiast ZIP →</button>
+      </section>
+
+      <section id="workspaceView" class="view">
+        <div class="project-bar">
+          <div><p class="eyebrow">AKTYWNY PROJEKT</p><h2 id="projectName">—</h2></div>
+          <button class="secondary" id="changeProject">Zmień projekt</button>
+        </div>
+
+        <section class="machine-panel" id="machinePanel">
+          <div class="machine-state">
+            <div class="machine-icon"><span></span></div>
+            <div><p class="kicker">LIGHTBURN LIVE</p><h3 id="lbState">Łączenie…</h3><small id="lbDevice">Wykrywanie lokalnej aplikacji</small></div>
+          </div>
+          <div class="job-progress">
+            <div><span id="lbElapsed">—</span><small>upłynęło</small></div>
+            <div class="progress-track"><i id="lbProgress"></i></div>
+            <div><span id="lbRemaining">—</span><small>pozostało</small></div>
+          </div>
+          <div class="live-metrics">
+            <span><small>POZYCJA</small><b id="lbPosition">X — / Y —</b></span>
+            <span><small>PRĘDKOŚĆ</small><b id="lbFeed">— mm/min</b></span>
+            <span><small>MOC</small><b id="lbPower">—</b></span>
+            <span><small>PRZEJŚCIA</small><b id="lbPasses">—</b></span>
+          </div>
+          <div class="machine-actions">
+            <button class="secondary" id="applyPreset">Zastosuj preset Pixi</button>
+            <button class="machine-button" data-lb-action="frame">Frame</button>
+            <button class="machine-button" data-lb-action="pause">Pauza</button>
+            <button class="machine-button danger" data-lb-action="stop">Stop</button>
+            <button class="machine-button start" id="lbStart">Start</button>
+          </div>
+          <label class="safety-check"><input id="safetyConfirm" type="checkbox"><span></span>Potwierdzam poprawny Frame, położenie laminatu, wentylację i nadzór nad laserem.</label>
+        </section>
+
+        <div class="dashboard-grid">
+          <section class="panel preview-panel">
+            <div class="panel-head">
+              <div><p class="kicker">PODGLĄD KONTROLNY</p><h3>Geometria miedzi</h3></div>
+              <div class="tabs"><button class="active" data-preview="top">TOP</button><button data-preview="bottom">BOTTOM</button><button data-preview="overlay">NAŁOŻENIE</button></div>
+            </div>
+            <div class="preview-stage"><img id="previewImage" alt="Podgląd maski"><div class="empty-preview" id="emptyPreview">Brak tej warstwy</div></div>
+            <div class="legend"><span class="via">Via</span><span class="pth">PTH</span><span class="npth">NPTH</span><span class="hint">Podgląd pokazuje miedź na czarno. Plik wypalania ma odwrócone znaczenie.</span></div>
+          </section>
+
+          <aside class="metrics">
+            <div class="metric-card accent"><small>WYMIAR PCB</small><strong id="boardSize">—</strong><span>z warstwy obrysu</span></div>
+            <div class="metric-card"><small>PRZELOTKI</small><strong id="viaCount">—</strong><span id="drillDetail">—</span></div>
+            <div class="metric-card"><small>MIN. APERTURA</small><strong id="minFeature">—</strong><span>kontrola rozdzielczości</span></div>
+          </aside>
+        </div>
+
+        <div class="lower-grid">
+          <section class="panel checks-panel">
+            <div class="panel-head"><div><p class="kicker">WALIDACJA</p><h3>Kontrole przed eksportem</h3></div><span class="counter" id="checkCounter">0</span></div>
+            <div id="checksList" class="checks-list"></div>
+            <details><summary>Rozpoznane pliki warstw</summary><div id="layersList" class="layers-list"></div></details>
+          </section>
+
+          <section class="panel setup-panel">
+            <div class="panel-head"><div><p class="kicker">USTAWIENIE FIZYCZNE</p><h3>Laminat na stole</h3></div></div>
+            <div class="field-grid">
+              <label>Szerokość laminatu <span><input id="blankWidth" type="number" step="0.01"> mm</span></label>
+              <label>Wysokość laminatu <span><input id="blankHeight" type="number" step="0.01"> mm</span></label>
+              <label>Lewy dolny X <span><input id="originX" type="number" step="0.01" value="10"> mm</span></label>
+              <label>Lewy dolny Y <span><input id="originY" type="number" step="0.01" value="10"> mm</span></label>
+            </div>
+            <div class="position-result"><small>POZYCJA ŚRODKA W LIGHTBURN</small><strong id="positionResult">X — / Y —</strong></div>
+            <fieldset><legend>Jak przewracasz płytkę?</legend>
+              <label class="flip-option active"><input type="radio" name="flip" value="left_right" checked><span class="flip-art lr">↔</span><b>Jak kartkę książki</b><small>odbicie lewo–prawo</small></label>
+              <label class="flip-option"><input type="radio" name="flip" value="top_bottom"><span class="flip-art tb">↕</span><b>Jak kartkę kalendarza</b><small>odbicie góra–dół</small></label>
+            </fieldset>
+          </section>
+        </div>
+
+        <section class="panel profile-panel">
+          <div><p class="kicker">PROFIL STARTOWY</p><h3>Pixi 5 W / farbowana miedź</h3><p>Ustawienia trafią do instrukcji i raportu. Geometria pozostaje od nich niezależna.</p></div>
+          <label>Prędkość <span><input id="speed" type="number" value="3000"> mm/min</span></label>
+          <label>Moc <span><input id="power" type="number" value="50"> %</span></label>
+          <label>Interwał <span><input id="interval" type="number" step="0.01" value="0.05"> mm</span></label>
+          <label>Przejścia <span><input id="passes" type="number" value="2"></span></label>
+          <label>Overscan <span><input id="overscan" type="number" step="0.1" value="2.5"> %</span></label>
+        </section>
+
+        <div class="export-bar">
+          <div><span class="ready-dot"></span><p><b id="exportStatus">Gotowe do wygenerowania</b><small>PNG 1270 DPI + podglądy + wiercenia + raport</small></p></div>
+          <button class="primary" id="generateButton">Generuj pakiet LightBurn <span>→</span></button>
+        </div>
+      </section>
+
+      <section id="resultView" class="view result-view">
+        <div class="success-mark">✓</div><p class="kicker">PAKIET GOTOWY</p><h2>Możesz przejść do LightBurn.</h2>
+        <p>Maski, alternatywne odbicie dolnej strony, przewodnik wiercenia i raport zostały zapisane w jednym katalogu.</p>
+        <code id="outputPath"></code>
+        <div class="result-actions"><button class="primary" id="loadTop">Wczytaj TOP do LightBurn</button><button class="secondary" id="loadBottom">Wczytaj BOTTOM</button><button class="secondary" id="openOutput">Otwórz katalog</button><button class="secondary" id="openReport">Otwórz raport</button><button class="text-button" id="backToProject">← Wróć do projektu</button></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="busy-overlay" id="busyOverlay"><div class="spinner"></div><strong id="busyText">Pracuję…</strong><small>Analiza odbywa się lokalnie</small></div>
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>

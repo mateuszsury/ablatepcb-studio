@@ -10,6 +10,7 @@ htmlcov/
 venv/
 *.egg-info/
 build/
+build-*/
 dist/
 dist-*/
 *.spec

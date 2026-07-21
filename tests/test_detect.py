@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from gerber2lightburn.detect import classify, coordinate_bounds
+from ablatepcb.detect import classify, coordinate_bounds
 
 
 OUTLINE = """%FSLAX45Y45*%
@@ -36,4 +36,3 @@ def test_common_layer_names_are_classified(tmp_path: Path) -> None:
         path = tmp_path / filename
         path.write_text("M48\n" if path.suffix.lower() == ".drl" else "%MOMM*%\n", encoding="utf-8")
         assert classify(path, tmp_path).kind == kind
-

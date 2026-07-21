@@ -24,6 +24,6 @@ jobs:
       - name: Install
         run: python -m pip install -e ".[dev]"
       - name: Compile
-        run: python -m compileall -q app.py gerber2lightburn tests
+        run: python -m compileall -q app.py ablatepcb tests
       - name: Test
         run: python -m pytest

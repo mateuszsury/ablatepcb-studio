@@ -36,7 +36,7 @@ def prepare_input(source: Path) -> tuple[Path, tempfile.TemporaryDirectory[str] 
     if not source.is_file() or source.suffix.lower() != ".zip":
         raise ValueError("Wybierz katalog Gerberów albo archiwum ZIP.")
 
-    temporary = tempfile.TemporaryDirectory(prefix="gerber2lightburn_")
+    temporary = tempfile.TemporaryDirectory(prefix="ablatepcb_")
     root = Path(temporary.name)
     with zipfile.ZipFile(source) as archive:
         members = archive.infolist()
@@ -153,4 +153,3 @@ def copy_sources(layers: list[LayerFile], destination: Path) -> None:
             name = f"{layer.kind}_{name}"
         used.add(name.lower())
         shutil.copy2(layer.path, source_dir / name)
-

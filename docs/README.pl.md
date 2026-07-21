@@ -1,8 +1,10 @@
-# Gerber2LightBurn PCB
+# AblatePCB Studio
 
 [English README](../README.md)
 
-Gerber2LightBurn PCB to lokalna aplikacja Windows, która zamienia paczki produkcyjne Gerber/Excellon na zweryfikowane maski ablacji farby dla jednostronnych i dwustronnych płytek PCB, a następnie bezpiecznie współpracuje z LightBurn.
+AblatePCB Studio to lokalna aplikacja Windows, która zamienia paczki produkcyjne Gerber/Excellon na zweryfikowane maski ablacji farby dla jednostronnych i dwustronnych płytek PCB oraz zapewnia niezależną integrację z LightBurn.
+
+![Widok aplikacji](assets/workspace-pl.png)
 
 ## Najważniejsze możliwości
 
@@ -19,8 +21,8 @@ Gerber2LightBurn PCB to lokalna aplikacja Windows, która zamienia paczki produk
 ## Szybki start
 
 ```powershell
-git clone https://github.com/mateuszsury/gerber2lightburn-pcb.git
-cd gerber2lightburn-pcb
+git clone https://github.com/mateuszsury/ablatepcb-studio.git
+cd ablatepcb-studio
 py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
@@ -40,9 +42,10 @@ python app.py
 
 Wczytanie pliku ani zastosowanie presetu nie uruchamia lasera. Start wymaga checkboxa bezpieczeństwa oraz dodatkowego potwierdzenia.
 
+Integrację sprawdzono z **LightBurn 2.1.03 w Windows**. Jest to opis kompatybilności, a nie deklaracja oficjalnej certyfikacji lub poparcia. Jeżeli identyfikatory interfejsu zmienią się w przyszłej wersji LightBurn, aplikacja pokaże błąd zamiast zgadywać kontrolkę.
+
 ## Ograniczenia
 
 Aplikacja nie zastępuje DRC ani kontroli netlisty. Domowe trawienie nie metalizuje otworów, dlatego przelotki trzeba połączyć drutem, nitami lub inną metodą. Parametry lasera są tylko punktem startowym i wymagają kalibracji dla konkretnej farby oraz laminatu.
 
-Projekt jest niezależny od LightBurn Software, AlgoLaser, EasyEDA, KiCad i Altium. Nazwy produktów opisują wyłącznie kompatybilność.
-
+Projekt jest niezależny i nie jest powiązany, zatwierdzony ani sponsorowany przez LightBurn Software, AlgoLaser, EasyEDA, KiCad lub Altium. LightBurn i pozostałe nazwy oraz znaki produktów należą do ich właścicieli i są używane wyłącznie do wskazania kompatybilności oraz przeznaczenia integracji. Nazwą projektu jest **AblatePCB Studio**; LightBurn nie jest częścią jego nazwy ani identyfikacji wizualnej.

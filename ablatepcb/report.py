@@ -9,7 +9,7 @@ from .models import Analysis, GenerationOptions
 
 def build_text_instructions(analysis: Analysis, options: GenerationOptions, position: dict[str, float]) -> str:
     flip = "lewo-prawo (jak kartkę książki)" if options.flip == "left_right" else "góra-dół (jak kartkę kalendarza)"
-    return f"""GERBER2LIGHTBURN PCB — INSTRUKCJA
+    return f"""ABLATEPCB STUDIO — INSTRUKCJA
 ===================================
 
 Płytka projektu: {analysis.board_bounds.width:.3f} x {analysis.board_bounds.height:.3f} mm
@@ -56,7 +56,7 @@ def build_report(analysis: Analysis, options: GenerationOptions, position: dict[
         if layer.kind != "other"
     )
     manifest_text = html.escape(json.dumps(manifest, indent=2, ensure_ascii=False))
-    return f'''<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Raport Gerber2LightBurn</title>
+    return f'''<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Raport AblatePCB Studio</title>
 <style>body{{font:15px system-ui;max-width:1050px;margin:40px auto;padding:0 24px;color:#17212b}}h1{{font-size:28px}}table{{border-collapse:collapse;width:100%}}td,th{{border-bottom:1px solid #dce3ea;padding:10px;text-align:left}}.ok{{color:#087f5b}}.warning{{color:#b25c00}}.error{{color:#c92a2a}}code,pre{{background:#f3f5f7;padding:3px 6px;border-radius:5px}}pre{{overflow:auto;padding:16px}}.metric{{display:inline-block;margin:6px 20px 6px 0}}</style></head><body>
 <h1>Raport przygotowania PCB</h1>
 <p><span class="metric"><b>Płytka:</b> {analysis.board_bounds.width:.3f} × {analysis.board_bounds.height:.3f} mm</span><span class="metric"><b>Laminat:</b> {options.blank_width:.3f} × {options.blank_height:.3f} mm</span></p>
@@ -66,4 +66,3 @@ def build_report(analysis: Analysis, options: GenerationOptions, position: dict[
 <h2>Ograniczenia procesu</h2><p>Konwerter potwierdza zgodność geometrii Gerbera z maskami. Nie zastępuje DRC/netlisty. Przelotki trzeba wywiercić i połączyć elektrycznie po obu stronach.</p>
 <details><summary>Manifest techniczny</summary><pre>{manifest_text}</pre></details>
 </body></html>'''
-

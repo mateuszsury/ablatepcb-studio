@@ -1,4 +1,4 @@
-Gerber2LightBurn PCB 0.1.0 is the first public release.
+AblatePCB Studio 0.2.0 introduces the independent project name while retaining the complete conversion and LightBurn interoperability workflow.
 
 Highlights:
 
@@ -10,5 +10,6 @@ Highlights:
 - LightBurn loading, live telemetry, ETA, Frame/Pause/Stop, and safety-gated Start;
 - command-line workflow, Windows build, tests, and complete project documentation.
 
-Safety note: laser parameters are starting points only. Always Frame first, provide suitable ventilation and eye/fire protection, and never leave the machine unattended.
+Trademark note: AblatePCB Studio is an independent project and is not affiliated with, endorsed by, or sponsored by LightBurn Software. The LightBurn name is used only to describe compatibility and interoperability.
 
+Safety note: laser parameters are starting points only. Always Frame first, provide suitable ventilation and eye/fire protection, and never leave the machine unattended.

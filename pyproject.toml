@@ -3,9 +3,9 @@ requires = ["setuptools>=75", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "gerber2lightburn-pcb"
-version = "0.1.0"
-description = "Offline Gerber to LightBurn PCB ablation mask converter"
+name = "ablatepcb-studio"
+version = "0.2.0"
+description = "Offline Gerber/Excellon PCB ablation studio with LightBurn integration"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "mateuszsury" }]
@@ -32,19 +32,19 @@ dependencies = [
 dev = ["pytest>=8.0", "pyinstaller>=6.0"]
 
 [project.urls]
-Homepage = "https://github.com/mateuszsury/gerber2lightburn-pcb"
-Repository = "https://github.com/mateuszsury/gerber2lightburn-pcb"
-Issues = "https://github.com/mateuszsury/gerber2lightburn-pcb/issues"
-Changelog = "https://github.com/mateuszsury/gerber2lightburn-pcb/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/mateuszsury/ablatepcb-studio"
+Repository = "https://github.com/mateuszsury/ablatepcb-studio"
+Issues = "https://github.com/mateuszsury/ablatepcb-studio/issues"
+Changelog = "https://github.com/mateuszsury/ablatepcb-studio/blob/main/CHANGELOG.md"
 
 [project.scripts]
-gerber2lightburn = "gerber2lightburn.cli:main"
+ablatepcb = "ablatepcb.cli:main"
 
 [tool.setuptools]
-packages = ["gerber2lightburn"]
+packages = ["ablatepcb"]
 
 [tool.setuptools.package-data]
-gerber2lightburn = ["web/*"]
+ablatepcb = ["web/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

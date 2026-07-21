@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from gerber2lightburn.engine import Converter
+from ablatepcb.engine import Converter
 
 
 ZIP = Path(os.environ.get("GERBER_GOLDEN_ZIP", "__missing_golden_zip__"))

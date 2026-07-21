@@ -2,6 +2,18 @@
 
 All notable changes are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.3] - 2026-07-22
+
+### Fixed
+
+- Import generated PNG masks into the current LightBurn project and automatically select them.
+- Apply and read back image size and position instead of trusting no-op UI Automation writes.
+- Verify the resulting image lower-left coordinate after every LightBurn import.
+
+### Added
+
+- Bidirectional navigation between Source, Review, Setup, and Export while preserving the active project.
+
 ## [0.2.2] - 2026-07-21
 
 ### Fixed

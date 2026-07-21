@@ -2,6 +2,8 @@ let backend = null;
 let analysis = null;
 let selectedPreview = "top";
 let lastLightBurnStatus = null;
+let outputReady = false;
+let currentStep = 1;
 let language = localStorage.getItem("ablatepcb-language") === "en" ? "en" : "pl";
 
 const PL_EN = {
@@ -43,7 +45,7 @@ const PL_EN = {
   "Generuj pakiet LightBurn": "Generate LightBurn package",
   "PAKIET GOTOWY": "PACKAGE READY", "Możesz przejść do LightBurn.": "You can continue in LightBurn.",
   "Maski, alternatywne odbicie dolnej strony, przewodnik wiercenia i raport zostały zapisane w jednym katalogu.": "Masks, alternate bottom flip, drilling guide, and report were saved in one folder.",
-  "Wczytaj TOP do LightBurn": "Load TOP into LightBurn", "Wczytaj BOTTOM": "Load BOTTOM", "Otwórz katalog": "Open folder", "Otwórz raport": "Open report", "← Wróć do projektu": "← Back to project",
+  "Wczytaj TOP i ustaw pozycję": "Load TOP and set position", "Wczytaj BOTTOM i ustaw pozycję": "Load BOTTOM and set position", "Otwórz katalog": "Open folder", "Otwórz raport": "Open report", "← Wróć do projektu": "← Back to project",
   "Pracuję…": "Working…", "Analiza odbywa się lokalnie": "Analysis runs locally", "LightBurn offline": "LightBurn offline",
   "brak danych": "no data", "slotów": "slots", "Start wymaga potwierdzenia bezpieczeństwa.": "Start requires safety confirmation.",
   "Przed Start potwierdź Frame, położenie płytki, wentylację i nadzór.": "Before Start, confirm the Frame, board position, ventilation, and supervision.",
@@ -106,6 +108,7 @@ const $ = (id) => document.getElementById(id);
 const sourceView = $("sourceView");
 const workspaceView = $("workspaceView");
 const resultView = $("resultView");
+const stepButtons = Array.from(document.querySelectorAll(".step[data-step]"));
 
 function connectQtBackend() {
   new window.QWebChannel(qt.webChannelTransport, (channel) => {
@@ -134,6 +137,46 @@ function showView(view) {
   [sourceView, workspaceView, resultView].forEach((item) => item.classList.toggle("active-view", item === view));
 }
 
+function updateStepNavigation() {
+  stepButtons.forEach((button) => {
+    const step = Number(button.dataset.step);
+    const locked = step > 1 && !analysis;
+    button.disabled = locked;
+    button.setAttribute("aria-disabled", String(locked));
+    button.classList.toggle("available", !locked);
+    button.classList.toggle("active", step === currentStep);
+    if (step === currentStep) button.setAttribute("aria-current", "step");
+    else button.removeAttribute("aria-current");
+  });
+}
+
+function scrollToStepTarget(target, smooth) {
+  if (!target) return;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    target.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+  }));
+}
+
+function navigateToStep(step, smooth = true) {
+  if (step > 1 && !analysis) return;
+  currentStep = step;
+  if (step === 1) {
+    showView(sourceView);
+    scrollToStepTarget(sourceView, smooth);
+  } else if (step === 4 && outputReady) {
+    showView(resultView);
+    scrollToStepTarget(resultView, smooth);
+  } else {
+    showView(workspaceView);
+    const target = step === 2 ? $("controlSection") : step === 3 ? $("setupSection") : $("exportSection");
+    scrollToStepTarget(target, smooth);
+  }
+  updateStepNavigation();
+}
+
+stepButtons.forEach((button) => button.addEventListener("click", () => navigateToStep(Number(button.dataset.step))));
+updateStepNavigation();
+
 window.setDropActive = (active) => $("dropZone").classList.toggle("drag", active);
 
 $("dropZone").addEventListener("click", () => backend && backend.chooseInput());
@@ -141,12 +184,13 @@ $("folderButton").addEventListener("click", () => backend && backend.chooseFolde
 $("changeProject").addEventListener("click", () => backend && backend.chooseInput());
 $("openOutput").addEventListener("click", () => backend && backend.openOutput());
 $("openReport").addEventListener("click", () => backend && backend.openReport());
-$("loadTop").addEventListener("click", () => backend && backend.loadGeneratedInLightBurn("top"));
-$("loadBottom").addEventListener("click", () => backend && backend.loadGeneratedInLightBurn("bottom"));
-$("backToProject").addEventListener("click", () => showView(workspaceView));
+$("loadTop").addEventListener("click", () => backend && backend.loadGeneratedInLightBurn("top", JSON.stringify(collectOptions())));
+$("loadBottom").addEventListener("click", () => backend && backend.loadGeneratedInLightBurn("bottom", JSON.stringify(collectOptions())));
+$("backToProject").addEventListener("click", () => navigateToStep(3));
 
 function onAnalysis(payload) {
   analysis = JSON.parse(payload);
+  outputReady = false;
   const previewStage = document.querySelector(".preview-stage");
   if (analysis.board.width > 0 && analysis.board.height > 0) {
     previewStage.style.setProperty("--preview-board-aspect", `${analysis.board.width} / ${analysis.board.height}`);
@@ -165,8 +209,7 @@ function onAnalysis(payload) {
   updatePosition();
   $("generateButton").disabled = !analysis.canGenerate;
   $("exportStatus").textContent = translateValue(analysis.canGenerate ? "Gotowe do wygenerowania" : "Napraw błędy blokujące");
-  showView(workspaceView);
-  document.querySelectorAll(".step").forEach((step, index) => step.classList.toggle("active", index === 1));
+  navigateToStep(2, false);
 }
 
 function renderChecks() {
@@ -275,9 +318,9 @@ function onLightBurnResult(payload) {
 
 function onGenerated(payload) {
   const data = JSON.parse(payload);
+  outputReady = true;
   $("outputPath").textContent = data.path;
-  showView(resultView);
-  document.querySelectorAll(".step").forEach((step, index) => step.classList.toggle("active", index === 3));
+  navigateToStep(4);
 }
 
 function setBusy(active, message) {

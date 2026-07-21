@@ -32,7 +32,7 @@ The converter is vendor-neutral. EasyEDA, KiCad, Altium, standard RS-274X Gerber
 - Outline, via, PTH, NPTH, slot, minimum-feature, and copper-bound checks.
 - Pixel-accurate 1270 DPI output, preview images, drill and registration guides.
 - Configurable board origin, blank size, speed, power, interval, passes, and overscan.
-- Safe LightBurn integration: load TOP/BOTTOM, apply the active-layer preset, Frame, Pause, Stop, and explicitly confirmed Start.
+- Safe LightBurn integration: import and verify TOP/BOTTOM placement, apply the active-layer preset, Frame, Pause, Stop, and explicitly confirmed Start.
 - Live LightBurn state, controller state, XY position, feed, power, progress, elapsed time, and ETA.
 - LightBurn status, open/focus, and Pixi preset controls are available immediately, before importing a Gerber package.
 - Polish and English interface with a locally persisted language choice.
@@ -45,7 +45,7 @@ The converter is vendor-neutral. EasyEDA, KiCad, Altium, standard RS-274X Gerber
 3. Set the physical blank size and its lower-left bed coordinate. The default is **X=10 mm, Y=10 mm**.
 4. Choose how the board will be flipped after the first side.
 5. Generate the LightBurn package.
-6. Load TOP or BOTTOM into LightBurn, apply the preset, and run **Frame**.
+6. Import TOP or BOTTOM into LightBurn; AblatePCB Studio applies and verifies the configured placement, then run **Frame**.
 7. Confirm the board position, ventilation, eye protection, fire safety, and continuous supervision.
 8. Only then use Start. The default Pixi profile uses **2 passes**.
 
@@ -99,7 +99,7 @@ In ablation masks, white means copper that remains protected by paint; black mea
 
 File loading, liveness checks, and Start use LightBurn's documented localhost UDP automation interface. Detailed status, ETA, active-layer values, Frame, Pause, and Stop are read or invoked through Windows UI Automation. `FORCELOAD` is deliberately not used, so unsaved LightBurn work is never discarded without its own prompt.
 
-Without a loaded Gerber project, applying a preset changes only speed, power, interval, and pass count on the active LightBurn layer. Image size, position, and coordinate mode remain untouched. Once a project is loaded, AblatePCB Studio can also apply its calculated image geometry.
+Without a loaded Gerber project, applying a preset changes only speed, power, interval, and pass count on the active LightBurn layer. Image size, position, and coordinate mode remain untouched. Once a project is loaded, importing TOP or BOTTOM also applies its calculated geometry and verifies the values read back from LightBurn.
 
 The integration has been tested with **LightBurn 2.1.03 on Windows**. This is a compatibility statement, not a claim of official certification or endorsement. Because LightBurn UI identifiers can change between versions, AblatePCB Studio fails visibly when it cannot identify a control instead of guessing.
 

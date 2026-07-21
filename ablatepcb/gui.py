@@ -185,6 +185,7 @@ class Bridge(QObject):
     def analyzePath(self, path: str) -> None:
         if self._busy:
             return
+        self.output_path = None
         self._set_busy(True, self._tr("Analizuję Gerbery, otwory i obrys…", "Analyzing Gerbers, drills, and outline…"))
 
         def task() -> None:
@@ -233,9 +234,16 @@ class Bridge(QObject):
             if report.exists():
                 QDesktopServices.openUrl(QUrl.fromLocalFile(str(report)))
 
-    @Slot(str)
-    def loadGeneratedInLightBurn(self, side: str) -> None:
+    @Slot(str, str)
+    def loadGeneratedInLightBurn(self, side: str, options_json: str) -> None:
         if self._lightburn_busy:
+            return
+        try:
+            options = json.loads(options_json)
+            options["includeGeometry"] = True
+            options["selectCenteredGraphic"] = True
+        except (json.JSONDecodeError, TypeError):
+            self.errorOccurred.emit("Nieprawidłowe ustawienia położenia LightBurn.")
             return
         if self.output_path is None:
             self.errorOccurred.emit("Najpierw wygeneruj pakiet LightBurn.")
@@ -249,14 +257,24 @@ class Bridge(QObject):
             return
         source = self.output_path / names[side]
         self._lightburn_busy = True
-        self.busyChanged.emit(True, self._tr(f"Wczytuję {side.upper()} do LightBurn…", f"Loading {side.upper()} into LightBurn…"))
+        self.busyChanged.emit(True, self._tr(
+            f"Wczytuję {side.upper()} i ustawiam pozycję w LightBurn…",
+            f"Loading {side.upper()} and setting its LightBurn position…",
+        ))
 
         def task() -> None:
             try:
-                LightBurnConnector().load_file(source)
+                connector = LightBurnConnector()
+                connector.load_file(source)
+                result = connector.apply_preset(options)
+                lower_left = result["imageLowerLeft"]
                 self.lightBurnResult.emit(json.dumps({
-                    "action": "load",
-                    "message": f"Przekazano {source.name} do LightBurn. Jeśli pojawiło się pytanie o niezapisany projekt, odpowiedz w LightBurn, a następnie zastosuj preset.",
+                    "action": "load_and_position",
+                    **result,
+                    "message": self._tr(
+                        f"Wczytano {source.name} i zweryfikowano lewy dolny róg obrazu: X {lower_left['x']:.3f} / Y {lower_left['y']:.3f} mm.",
+                        f"Loaded {source.name} and verified the image lower-left corner at X {lower_left['x']:.3f} / Y {lower_left['y']:.3f} mm.",
+                    ),
                 }, ensure_ascii=False))
             except Exception as exc:  # noqa: BLE001
                 self.errorOccurred.emit(str(exc))

@@ -7,6 +7,33 @@
 .control-dock .machine-panel { margin-bottom: 0; }
 .control-dock .profile-panel { margin-top: 10px; }
 .control-dock + #sourceView .hero-grid { min-height: 500px; }
+.preview-stage {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 320px;
+  max-height: 620px;
+  aspect-ratio: var(--preview-board-aspect, 3 / 1);
+}
+.preview-stage img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  padding: 18px 22px;
+  object-fit: contain;
+  object-position: center;
+  transition: opacity .18s ease;
+}
+.preview-stage .empty-preview {
+  position: absolute;
+  inset: 0;
+  place-items: center;
+}
 .brand-logo { width: 42px; height: 42px; border-radius: 9px; object-fit: cover; box-shadow: 0 0 18px #47e6a122; }
 .language-switch { display: flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: #10161a; }
 .language-switch button { border: 0; background: transparent; color: var(--muted); border-radius: 999px; padding: 5px 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
@@ -39,4 +66,4 @@
 .safety-check { grid-column: 1/-1; color: #9caab2; font-size: 10px; display: flex; gap: 8px; align-items: center; }
 .safety-check input { accent-color: var(--accent); }
 @media(max-width:1150px){.machine-panel{grid-template-columns:1fr 1fr}.live-metrics{grid-column:1/-1}.machine-actions{flex-wrap:wrap}}
-@media(max-width:850px){.machine-panel{grid-template-columns:1fr}.live-metrics,.machine-actions,.safety-check{grid-column:1}.live-metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:850px){.machine-panel{grid-template-columns:1fr}.live-metrics,.machine-actions,.safety-check{grid-column:1}.live-metrics{grid-template-columns:repeat(2,1fr)}.project-bar{gap:12px;align-items:center}.project-bar>div,.dashboard-grid>*,.lower-grid>*{min-width:0}.project-bar>div{flex:1}.project-bar h2{max-width:100%}.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.metric-card{min-width:0}.preview-panel .panel-head{gap:12px;flex-wrap:wrap}.preview-stage{min-height:260px;max-height:480px}.preview-stage img{padding:14px}.legend{flex-wrap:wrap}.legend .hint{flex-basis:100%;margin-left:0}}

@@ -147,6 +147,10 @@ $("backToProject").addEventListener("click", () => showView(workspaceView));
 
 function onAnalysis(payload) {
   analysis = JSON.parse(payload);
+  const previewStage = document.querySelector(".preview-stage");
+  if (analysis.board.width > 0 && analysis.board.height > 0) {
+    previewStage.style.setProperty("--preview-board-aspect", `${analysis.board.width} / ${analysis.board.height}`);
+  }
   $("projectName").textContent = analysis.source;
   $("boardSize").textContent = `${analysis.board.width.toFixed(2)} × ${analysis.board.height.toFixed(2)}`;
   $("viaCount").textContent = analysis.drills.vias;
@@ -176,9 +180,10 @@ function renderLayers() {
 
 function renderPreview() {
   const source = analysis.previews[selectedPreview];
-  $("previewImage").style.display = source ? "block" : "none";
-  $("emptyPreview").style.display = source ? "none" : "block";
-  if (source) $("previewImage").src = source;
+  const image = $("previewImage");
+  image.style.display = source ? "block" : "none";
+  $("emptyPreview").style.display = source ? "none" : "grid";
+  if (source) image.src = source;
   document.querySelectorAll("[data-preview]").forEach((button) => button.classList.toggle("active", button.dataset.preview === selectedPreview));
 }
 

@@ -34,6 +34,7 @@ The converter is vendor-neutral. EasyEDA, KiCad, Altium, standard RS-274X Gerber
 - Configurable board origin, blank size, speed, power, interval, passes, and overscan.
 - Safe LightBurn integration: load TOP/BOTTOM, apply the active-layer preset, Frame, Pause, Stop, and explicitly confirmed Start.
 - Live LightBurn state, controller state, XY position, feed, power, progress, elapsed time, and ETA.
+- LightBurn status, open/focus, and Pixi preset controls are available immediately, before importing a Gerber package.
 - Polish and English interface with a locally persisted language choice.
 - Offline processing. Project data is not uploaded anywhere.
 
@@ -97,6 +98,8 @@ In ablation masks, white means copper that remains protected by paint; black mea
 ## LightBurn integration
 
 File loading, liveness checks, and Start use LightBurn's documented localhost UDP automation interface. Detailed status, ETA, active-layer values, Frame, Pause, and Stop are read or invoked through Windows UI Automation. `FORCELOAD` is deliberately not used, so unsaved LightBurn work is never discarded without its own prompt.
+
+Without a loaded Gerber project, applying a preset changes only speed, power, interval, and pass count on the active LightBurn layer. Image size, position, and coordinate mode remain untouched. Once a project is loaded, AblatePCB Studio can also apply its calculated image geometry.
 
 The integration has been tested with **LightBurn 2.1.03 on Windows**. This is a compatibility statement, not a claim of official certification or endorsement. Because LightBurn UI identifiers can change between versions, AblatePCB Studio fails visibly when it cannot identify a control instead of guessing.
 

@@ -3,6 +3,10 @@
 .toast.success { background: #132d22; border-color: #2d7655; color: #aef0d1; }
 
 .header-tools { display: flex; align-items: center; gap: 10px; }
+.control-dock { margin-bottom: 24px; }
+.control-dock .machine-panel { margin-bottom: 0; }
+.control-dock .profile-panel { margin-top: 10px; }
+.control-dock + #sourceView .hero-grid { min-height: 500px; }
 .brand-logo { width: 42px; height: 42px; border-radius: 9px; object-fit: cover; box-shadow: 0 0 18px #47e6a122; }
 .language-switch { display: flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: #10161a; }
 .language-switch button { border: 0; background: transparent; color: var(--muted); border-radius: 999px; padding: 5px 8px; font-size: 10px; font-weight: 800; cursor: pointer; }

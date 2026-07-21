@@ -2,15 +2,16 @@ from __future__ import annotations
 
 import re
 import ctypes
+import os
+import shutil
 import socket
+import subprocess
 from pathlib import Path
 from dataclasses import asdict, dataclass
 from typing import Any
 
 import win32gui
 import win32process
-from pywinauto import Application
-from pywinauto.uia_defines import IUIA
 
 
 IDS = {
@@ -128,12 +129,42 @@ class LightBurnConnector:
         return result[0] if result else None
 
     def _window(self):  # type: ignore[no-untyped-def]
+        # Import lazily so pywinauto cannot change the GUI thread's COM mode
+        # before Qt initializes the native Windows file picker.
+        from pywinauto import Application
+
         found = self.find_window()
         if found is None:
             raise RuntimeError("LightBurn nie jest uruchomiony.")
         hwnd, pid, _title = found
         app = Application(backend="uia").connect(process=pid, timeout=3)
         return app, app.window(handle=hwnd), found
+
+    def open_or_focus(self) -> dict[str, Any]:
+        found = self.find_window()
+        if found is not None:
+            hwnd, _pid, _title = found
+            try:
+                win32gui.ShowWindow(hwnd, 9)  # SW_RESTORE
+                win32gui.BringWindowToTop(hwnd)
+                win32gui.SetForegroundWindow(hwnd)
+            except Exception:
+                pass
+            return {"action": "focus", "launched": False}
+
+        candidates: list[Path] = []
+        from_path = shutil.which("LightBurn.exe")
+        if from_path:
+            candidates.append(Path(from_path))
+        for variable in ("ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA"):
+            root = os.environ.get(variable)
+            if root:
+                candidates.extend((Path(root) / "LightBurn" / "LightBurn.exe", Path(root) / "LightBurn Software" / "LightBurn.exe"))
+        for executable in candidates:
+            if executable.is_file():
+                subprocess.Popen([str(executable)], cwd=str(executable.parent), close_fds=True)  # noqa: S603
+                return {"action": "launch", "launched": True, "path": str(executable)}
+        raise FileNotFoundError("Nie znaleziono instalacji LightBurn. Uruchom LightBurn ręcznie lub zainstaluj go w standardowym katalogu.")
 
     @staticmethod
     def _legacy_number(control) -> float | None:  # type: ignore[no-untyped-def]
@@ -176,6 +207,8 @@ class LightBurnConnector:
             return LiveStatus(message=str(exc))
 
     def _range_set(self, control, value: float) -> None:  # type: ignore[no-untyped-def]
+        from pywinauto.uia_defines import IUIA
+
         uia = IUIA()
         unknown = control.element_info.element.GetCurrentPattern(uia.UIA_dll.UIA_RangeValuePatternId)
         pattern = unknown.QueryInterface(uia.UIA_dll.IUIAutomationRangeValuePattern)
@@ -192,6 +225,8 @@ class LightBurnConnector:
             return
         except ValueError:
             pass
+        from pywinauto.uia_defines import IUIA
+
         uia = IUIA()
         unknown = control.element_info.element.GetCurrentPattern(uia.UIA_dll.UIA_LegacyIAccessiblePatternId)
         pattern = unknown.QueryInterface(uia.UIA_dll.IUIAutomationLegacyIAccessiblePattern)
@@ -211,17 +246,21 @@ class LightBurnConnector:
         for key, value in values.items():
             self._numeric_set(window.child_window(auto_id=IDS[key]).wrapper_object(), value)
 
-        # Selected image: first X/Y pair is position, second pair is width/height.
-        x_controls = sorted(
-            [item for item in window.descendants(control_type="Spinner") if item.element_info.automation_id == "MainWindow.tbNumericEdits.QXYControl.sbX"],
-            key=lambda item: item.rectangle().left,
-        )
-        y_controls = sorted(
-            [item for item in window.descendants(control_type="Spinner") if item.element_info.automation_id == "MainWindow.tbNumericEdits.QXYControl.sbY"],
-            key=lambda item: item.rectangle().left,
-        )
+        include_geometry = bool(options.get("includeGeometry", True))
         position_applied = False
-        if len(x_controls) >= 2 and len(y_controls) >= 2:
+        if include_geometry:
+            # Selected image: first X/Y pair is position, second pair is width/height.
+            x_controls = sorted(
+                [item for item in window.descendants(control_type="Spinner") if item.element_info.automation_id == "MainWindow.tbNumericEdits.QXYControl.sbX"],
+                key=lambda item: item.rectangle().left,
+            )
+            y_controls = sorted(
+                [item for item in window.descendants(control_type="Spinner") if item.element_info.automation_id == "MainWindow.tbNumericEdits.QXYControl.sbY"],
+                key=lambda item: item.rectangle().left,
+            )
+        else:
+            x_controls, y_controls = [], []
+        if include_geometry and len(x_controls) >= 2 and len(y_controls) >= 2:
             board_w = float(options.get("boardWidth", 0))
             board_h = float(options.get("boardHeight", 0))
             blank_w = max(board_w, float(options.get("blankWidth", board_w)))
@@ -234,18 +273,23 @@ class LightBurnConnector:
             self._numeric_set(y_controls[1], board_h)
             position_applied = True
 
-        # Absolute coordinates are required for deterministic placement.
-        origin = window.child_window(auto_id=IDS["origin"]).wrapper_object()
-        try:
-            origin.select("Współrzędne bezwzględne")
-        except Exception:
-            pass
+        if include_geometry:
+            # Absolute coordinates are required for deterministic placement.
+            origin = window.child_window(auto_id=IDS["origin"]).wrapper_object()
+            try:
+                origin.select("Współrzędne bezwzględne")
+            except Exception:
+                pass
 
         return {
             "numericPreset": True,
             "imagePreset": "lightburn_default",
             "positionApplied": position_applied,
-            "message": "Zastosowano prędkość, moc, interwał, liczbę przejść, rozmiar i pozycję. Ustawienia obrazu korzystają z zapisanego profilu LightBurn.",
+            "message": (
+                "Zastosowano prędkość, moc, interwał, liczbę przejść, rozmiar i pozycję. Ustawienia obrazu korzystają z zapisanego profilu LightBurn."
+                if include_geometry
+                else "Zastosowano prędkość, moc, interwał i liczbę przejść do aktywnej warstwy LightBurn. Geometria nie została zmieniona."
+            ),
         }
 
     def load_file(self, path: str | Path) -> None:

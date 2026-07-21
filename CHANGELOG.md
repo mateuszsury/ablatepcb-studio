@@ -2,6 +2,18 @@
 
 All notable changes are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.1] - 2026-07-21
+
+### Fixed
+
+- Replaced the blocking native Windows file picker with an asynchronous Qt picker attached to the application window.
+
+### Added
+
+- Always-visible LightBurn connection, live state, and Pixi preset controls before Gerber import.
+- Open-or-focus LightBurn directly from AblatePCB Studio.
+- Preset-only mode that updates the active LightBurn layer without changing image geometry when no Gerber project is loaded.
+
 ## [0.2.0] - 2026-07-21
 
 ### Changed

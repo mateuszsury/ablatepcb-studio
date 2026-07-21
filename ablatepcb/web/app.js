@@ -22,6 +22,9 @@ const PL_EN = {
   "Łączenie…": "Connecting…", "Wykrywanie lokalnej aplikacji": "Detecting local application", "upłynęło": "elapsed", "pozostało": "remaining",
   "POZYCJA": "POSITION", "PRĘDKOŚĆ": "SPEED", "MOC": "POWER", "PRZEJŚCIA": "PASSES",
   "Zastosuj preset Pixi": "Apply Pixi preset", "Pauza": "Pause",
+  "Otwórz / pokaż LightBurn": "Open / show LightBurn",
+  "PROFIL STARTOWY · DOSTĘPNY BEZ GERBERA": "STARTING PROFILE · AVAILABLE WITHOUT GERBER",
+  "Bez projektu preset zmienia tylko aktywną warstwę LightBurn. Po imporcie może także ustawić rozmiar i pozycję obrazu.": "Without a project, the preset changes only the active LightBurn layer. After import, it can also set image size and position.",
   "Potwierdzam poprawny Frame, położenie laminatu, wentylację i nadzór nad laserem.": "I confirm the Frame, board position, ventilation, and continuous laser supervision.",
   "PODGLĄD KONTROLNY": "CONTROL PREVIEW", "Geometria miedzi": "Copper geometry", "NAŁOŻENIE": "OVERLAY",
   "Podgląd pokazuje miedź na czarno. Plik wypalania ma odwrócone znaczenie.": "The preview shows copper in black. The ablation file uses the opposite meaning.",
@@ -47,7 +50,9 @@ const PL_EN = {
   "Uruchomić laser? Pozostań przy urządzeniu przez cały proces.": "Start the laser? Stay with the machine for the entire job.",
   "Polecenie wykonane.": "Command completed.", "Nieprawidłowe ustawienia generowania.": "Invalid generation settings.",
   "Najpierw wygeneruj pakiet LightBurn.": "Generate the LightBurn package first.", "Nieznana strona płytki.": "Unknown board side.",
-  "Nieprawidłowy preset LightBurn.": "Invalid LightBurn preset."
+  "Nieprawidłowy preset LightBurn.": "Invalid LightBurn preset.",
+  "Zastosowano prędkość, moc, interwał i liczbę przejść do aktywnej warstwy LightBurn. Geometria nie została zmieniona.": "Speed, power, interval, and pass count were applied to the active LightBurn layer. Geometry was not changed.",
+  "Zastosowano prędkość, moc, interwał, liczbę przejść, rozmiar i pozycję. Ustawienia obrazu korzystają z zapisanego profilu LightBurn.": "Speed, power, interval, pass count, size, and position were applied. Image settings use the saved LightBurn profile."
 };
 const EN_PL = Object.fromEntries(Object.entries(PL_EN).map(([pl, en]) => [en, pl]));
 
@@ -183,7 +188,12 @@ document.querySelectorAll("input[name=flip]").forEach((input) => input.addEventL
 }));
 ["blankWidth", "blankHeight", "originX", "originY"].forEach((id) => $(id).addEventListener("input", updatePosition));
 
-function numeric(id, fallback = 0) { const value = Number($(id).value); return Number.isFinite(value) ? value : fallback; }
+function numeric(id, fallback = 0) {
+  const raw = $(id)?.value;
+  if (raw == null || String(raw).trim() === "") return fallback;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : fallback;
+}
 function updatePosition() {
   if (!analysis) return;
   const x = numeric("originX") + numeric("blankWidth", analysis.board.width) / 2;
@@ -192,14 +202,17 @@ function updatePosition() {
 }
 
 function collectOptions() {
+  const boardWidth = analysis?.board?.width || 0;
+  const boardHeight = analysis?.board?.height || 0;
   return {
     dpmm: 50,
-    blankWidth: numeric("blankWidth", analysis.board.width), blankHeight: numeric("blankHeight", analysis.board.height),
+    includeGeometry: Boolean(analysis),
+    blankWidth: numeric("blankWidth", boardWidth), blankHeight: numeric("blankHeight", boardHeight),
     originX: numeric("originX"), originY: numeric("originY"),
     flip: document.querySelector("input[name=flip]:checked").value,
     speed: numeric("speed", 3000), power: numeric("power", 50), interval: numeric("interval", .05),
     passes: numeric("passes", 2), overscan: numeric("overscan", 2.5),
-    boardWidth: analysis.board.width, boardHeight: analysis.board.height
+    boardWidth, boardHeight
   };
 }
 
@@ -209,9 +222,11 @@ $("generateButton").addEventListener("click", () => {
 });
 
 $("applyPreset").addEventListener("click", () => {
-  if (!backend || !analysis) return;
+  if (!backend) return;
   backend.applyLightBurnPreset(JSON.stringify(collectOptions()));
 });
+
+$("openLightBurn").addEventListener("click", () => backend && backend.openLightBurn());
 
 document.querySelectorAll("[data-lb-action]").forEach((button) => button.addEventListener("click", () => {
   if (backend) backend.lightBurnAction(button.dataset.lbAction, false);
@@ -241,8 +256,10 @@ function renderLightBurnStatus(status) {
   $("lbRemaining").textContent = status.remaining;
   $("lbProgress").style.width = `${Math.max(0, Math.min(1, status.progress)) * 100}%`;
   $("lbPosition").textContent = status.x == null ? "X — / Y —" : `X ${status.x.toFixed(2)} / Y ${status.y.toFixed(2)}`;
-  $("lbFeed").textContent = status.feed == null ? "— mm/min" : `${status.feed.toFixed(0)} mm/min`;
-  $("lbPower").textContent = status.power == null ? "—" : `S${status.power.toFixed(0)}`;
+  const displayedFeed = status.feed > 0 ? status.feed : status.layer_speed;
+  const displayedPower = status.power > 0 ? status.power : status.layer_power;
+  $("lbFeed").textContent = displayedFeed == null ? "— mm/min" : `${displayedFeed.toFixed(0)} mm/min`;
+  $("lbPower").textContent = displayedPower == null ? "—" : `${displayedPower.toFixed(0)}%`;
   $("lbPasses").textContent = status.layer_passes == null ? "—" : status.layer_passes;
 }
 

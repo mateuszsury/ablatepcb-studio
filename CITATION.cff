@@ -4,7 +4,7 @@ title: "AblatePCB Studio"
 type: software
 authors:
   - name: "mateuszsury"
-version: 0.2.0
+version: 0.2.1
 date-released: 2026-07-21
 url: "https://github.com/mateuszsury/ablatepcb-studio"
 license: MIT

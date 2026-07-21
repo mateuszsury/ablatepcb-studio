@@ -15,6 +15,7 @@ AblatePCB Studio to lokalna aplikacja Windows, która zamienia paczki produkcyjn
 - konfigurowalne: rozmiar laminatu, pozycja, moc, prędkość, interwał, overscan i liczba przejść;
 - preset startowy AlgoLaser Pixi 5 W z 2 przejściami;
 - LightBurn Live: stan, ETA, XY, prędkość, moc, Frame, Pauza, Stop i potwierdzony Start;
+- stan połączenia, przycisk otwierania LightBurn i preset Pixi dostępne od razu, bez wczytywania Gerbera;
 - przełącznik PL/EN zapamiętywany lokalnie;
 - całkowicie lokalne przetwarzanie plików.
 
@@ -41,6 +42,8 @@ python app.py
 8. Dopiero wtedy potwierdź Start i pozostań przy urządzeniu.
 
 Wczytanie pliku ani zastosowanie presetu nie uruchamia lasera. Start wymaga checkboxa bezpieczeństwa oraz dodatkowego potwierdzenia.
+
+Jeżeli nie wczytano jeszcze Gerbera, preset zmienia wyłącznie prędkość, moc, interwał i liczbę przejść aktywnej warstwy LightBurn. Rozmiar, pozycja obrazu i tryb współrzędnych pozostają bez zmian.
 
 Integrację sprawdzono z **LightBurn 2.1.03 w Windows**. Jest to opis kompatybilności, a nie deklaracja oficjalnej certyfikacji lub poparcia. Jeżeli identyfikatory interfejsu zmienią się w przyszłej wersji LightBurn, aplikacja pokaże błąd zamiast zgadywać kontrolkę.
 

@@ -12,6 +12,8 @@ The app never sends `FORCELOAD`. If LightBurn has unsaved changes, LightBurn rem
 
 The live panel reads the Laser status label, console tail, active-layer speed, power, passes, and interval. It invokes the standard Frame, Pause, and Stop controls. Preset application modifies the active layer and selected image only while LightBurn is not busy.
 
+The live panel and open/focus button are available before Gerber import. In this project-free mode, preset application changes only the active layer's speed, power, interval, and pass count; image geometry and coordinate mode are intentionally left untouched.
+
 UI Automation identifiers may change between LightBurn releases or languages. The integration degrades to an offline/error message rather than silently guessing a control.
 
 ## Start boundary

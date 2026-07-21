@@ -2,6 +2,14 @@
 
 All notable changes are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.2] - 2026-07-21
+
+### Fixed
+
+- Fit copper previews to the complete PCB outline without clipping at any window size.
+- Derive the preview frame aspect ratio from the analyzed board dimensions.
+- Prevent long Gerber paths and preview metrics from causing horizontal overflow on narrow screens.
+
 ## [0.2.1] - 2026-07-21
 
 ### Fixed

@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gerber2lightburn-pcb"
+version = "0.1.0"
+description = "Offline Gerber to LightBurn PCB ablation mask converter"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "mateuszsury" }]
+requires-python = ">=3.11"
+keywords = ["gerber", "excellon", "lightburn", "pcb", "laser", "easyeda", "kicad"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Win32 (MS Windows)",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+]
+dependencies = [
+  "numpy>=2.0",
+  "Pillow>=11.0",
+  "pygerber==2.4.3",
+  "PySide6>=6.8",
+  "pywinauto==0.6.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pyinstaller>=6.0"]
+
+[project.urls]
+Homepage = "https://github.com/mateuszsury/gerber2lightburn-pcb"
+Repository = "https://github.com/mateuszsury/gerber2lightburn-pcb"
+Issues = "https://github.com/mateuszsury/gerber2lightburn-pcb/issues"
+Changelog = "https://github.com/mateuszsury/gerber2lightburn-pcb/blob/main/CHANGELOG.md"
+
+[project.scripts]
+gerber2lightburn = "gerber2lightburn.cli:main"
+
+[tool.setuptools]
+packages = ["gerber2lightburn"]
+
+[tool.setuptools.package-data]
+gerber2lightburn = ["web/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["golden: requires external redistributable golden files"]

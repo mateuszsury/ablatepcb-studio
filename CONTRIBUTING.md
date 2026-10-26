@@ -12,3 +12,21 @@ Contributions are welcome. Please keep changes focused, local-first, and safe ar
 Never commit proprietary Gerbers, machine credentials, LightBurn preference backups, or personal filesystem paths. Test fixtures must be redistributable.
 
 Changes to Start, Stop, device movement, or preset application require an explicit safety analysis in the pull request. Tests must not start a physical laser.
+
+## Authorship and contributions
+
+Project-maintained changes use the Git identity `Mateusz Sury
+<66475105+mateuszsury@users.noreply.github.com>`. Configure it locally before
+committing:
+
+```sh
+git config user.name "Mateusz Sury"
+git config user.email "66475105+mateuszsury@users.noreply.github.com"
+git config user.useConfigOnly true
+```
+
+The maintainer takes responsibility for tool-assisted changes. Do not add AI
+tools as authors or co-authors. Preserve genuine human contributions, upstream
+history, copyright notices and third-party licenses. Keep release provenance
+and checksums intact. Describe the purpose of each change and record relevant
+validation; avoid generic upload messages and environment-specific worktree names.

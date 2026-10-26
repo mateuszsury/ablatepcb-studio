@@ -8,7 +8,7 @@ version = "0.2.3"
 description = "Offline Gerber/Excellon PCB ablation studio with LightBurn integration"
 readme = "README.md"
 license = { file = "LICENSE" }
-authors = [{ name = "mateuszsury" }]
+authors = [{ name = "Mateusz Sury" }]
 requires-python = ">=3.11"
 keywords = ["gerber", "excellon", "lightburn", "pcb", "laser", "easyeda", "kicad"]
 classifiers = [

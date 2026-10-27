@@ -19,6 +19,14 @@
 
 ![Application workspace](docs/assets/workspace-en.png)
 
+## Project overview
+
+A Windows desktop workflow from Gerber and Excellon files to PCB ablation masks and LightBurn.
+
+![AblatePCB Studio — File-generation workflow. Hardware setup and the final laser operation require their own checks.](docs/assets/presentation/overview.svg)
+
+File-generation workflow. Hardware setup and the final laser operation require their own checks.
+
 ## Why this exists
 
 AblatePCB Studio removes the fragile manual steps between an EDA fabrication export and a two-sided laser-resistant PCB mask. It detects the board outline, copper layers, Excellon drills, vias, plated/non-plated holes, and slots; validates their geometry; then generates deterministic 1270 DPI ablation images that can be loaded into LightBurn.
